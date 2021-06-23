@@ -3,7 +3,10 @@
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
+#![feature(alloc_error_handler)]
 #![reexport_test_harness_main = "test_main"]
+
+extern crate alloc;
 
 use core::panic::PanicInfo;
 
@@ -15,6 +18,7 @@ pub mod vga_buffer;
 pub mod interrupts;
 pub mod gdt;
 pub mod memory;
+pub mod allocator;
 
 pub trait Testable {
     fn run(&self) -> ();
@@ -90,4 +94,9 @@ pub fn init() {
     interrupts::init_idt();
     unsafe { interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
+}
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
+    panic!("allocation error: {:?}", layout)
 }

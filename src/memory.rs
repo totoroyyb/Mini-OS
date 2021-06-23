@@ -56,13 +56,13 @@ pub fn create_example_mapping(
 }
 
 /// A FrameAllocator that always returns `None`.
-pub struct EmptyFrameAllocator;
+// pub struct EmptyFrameAllocator;
 
-unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
-    fn allocate_frame(&mut self) -> Option<PhysFrame> {
-        None
-    }
-}
+// unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
+//     fn allocate_frame(&mut self) -> Option<PhysFrame> {
+//         None
+//     }
+// }
 
 use bootloader::bootinfo::MemoryMap;
 use bootloader::bootinfo::MemoryRegionType;
