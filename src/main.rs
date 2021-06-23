@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-// #![feature(alloc_error_handler)]
 #![test_runner(mini_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
@@ -28,25 +27,9 @@ fn panic(info: &PanicInfo) -> ! {
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use x86_64::{
-        VirtAddr,
-    };
-    use mini_os::allocator;
-    use mini_os::memory::{self, BootInfoFrameAllocator};
-
-    println!("Hello World{}", "!");
-
-    mini_os::init();
-
-    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
-    let mut mapper = unsafe { memory::init(phys_mem_offset) };
-    let mut frame_allocator = unsafe {
-        BootInfoFrameAllocator::init(&boot_info.memory_map)
-    };
-
-    allocator::init_heap(&mut mapper, &mut frame_allocator)
-        .expect("heap initialization failed");
-
+    kernel_init();
+    mem_init(boot_info);
+    
     let heap_value = Box::new(41);
     println!("heap_value at {:p}", heap_value);
 
@@ -64,19 +47,37 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     core::mem::drop(reference_counted);
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
-    #[cfg(test)]
-    test_main();
+    test_init();
 
     println!("It did not crash!");
 
     mini_os::hlt_loop()
 }
 
-// fn kernel_init() {
+fn kernel_init() {
+    println!("Hello World{}", "!");
 
-// }
+    mini_os::init();
+}
 
-// #[alloc_error_handler]
-// fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
-//     panic!("allocation error: {:?}", layout)
-// }
+fn mem_init(boot_info: &'static BootInfo) {
+    use x86_64::{
+        VirtAddr,
+    };
+    use mini_os::allocator;
+    use mini_os::memory::{self, BootInfoFrameAllocator};
+
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut frame_allocator = unsafe {
+        BootInfoFrameAllocator::init(&boot_info.memory_map)
+    };
+
+    allocator::init_heap(&mut mapper, &mut frame_allocator)
+        .expect("heap initialization failed");
+}
+
+fn test_init() {
+    #[cfg(test)]
+    test_main();
+}
