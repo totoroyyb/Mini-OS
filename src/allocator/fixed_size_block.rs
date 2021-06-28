@@ -1,6 +1,6 @@
 use alloc::alloc::Layout;
 use core::ptr;
-use crate::println;
+use crate::{print, println};
 
 use super::Locked;
 use alloc::alloc::GlobalAlloc;
@@ -65,9 +65,11 @@ unsafe impl GlobalAlloc for Locked<FixedSizeBlockAllocator> {
                 match allocator.list_heads[index].take() {
                     Some(node) => {
                         allocator.list_heads[index] = node.next.take();
+                        println!("IN SOME");
                         node as *mut ListNode as *mut u8
                     }
                     None => {
+                        println!("IN NONE");
                         // no block exists in list => allocate new block
                         let block_size = BLOCK_SIZES[index];
                         // only works if all block sizes are a power of 2

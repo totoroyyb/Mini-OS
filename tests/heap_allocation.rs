@@ -8,6 +8,7 @@ extern crate alloc;
 
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
+use core::usize;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 
@@ -46,7 +47,7 @@ fn simple_allocation() {
 
 #[test_case]
 fn large_vec() {
-    let n = 1000;
+    let n: u64 = 1000;
     let mut vec = Vec::new();
     for i in 0..n {
         vec.push(i);
